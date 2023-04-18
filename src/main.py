@@ -1,5 +1,6 @@
 # Ideen:
 # admin command /setcooldown=<val> oder /invokecooldown
+# admin command /debug that returns cooldown status, system time etc.
 
 from machine import Pin
 from network_lib import *
@@ -7,10 +8,14 @@ from secrets import *
 from time_lib import *
 from messages import *
 
+# Constants
+msgCooldownPeriod = 1
+btnCooldownPeriod = 3
+
+# Global Variables
 basementStatus = False
 basementStatusOld = False
 ignore = False
-
 last_changed = (0,0,0,0,0,0,0,0)
 
 keller_list = ("keller", "basement", "endstation", "bar", "community room",)
@@ -61,25 +66,26 @@ def handle_message(chat_id, date, message):
                 print("force status open")
                 basementStatus = True
                 ignore = True
-                
+
         elif "/help" in message:
             if chat_id == secrets['admin']:
                 send_message(chat_id, help_message)
                 basementStatus = False
 
         else: # General Commands
-            if not getMsgCooldownStatus():
+            # WH Group messages cooldown to avoid spam
+            if (not getMsgCooldownStatus()) and (chat_id == secrets['WHGroupIDint']):
                 return False
 
             if (("/basementstatus" in message) or check_combinations(message)):
                 announce_status(basementStatus, f'The community room \"Endstation\" is currently', getTimeString(last_changed), chat_id)
                 if chat_id == secrets['WHGroupIDint']:
-                    setMsgCooldown(1)
+                    setMsgCooldown(msgCooldownPeriod)
 
             if ("/basementinfo" in message):
                 send_message(chat_id, baseinfo_message)
                 if chat_id == secrets['WHGroupIDint']:
-                    setMsgCooldown(1)
+                    setMsgCooldown(msgCooldownPeriod)
 
         if basementStatusOld != basementStatus:
             last_changed = getTimeRTC()
@@ -97,26 +103,29 @@ def handle_message(chat_id, date, message):
 btn = Pin(28, Pin.IN, Pin.PULL_UP)
 
 def getButtonStatus():
-    global basementStatus, ignore
+    global basementStatus, ignore, last_changed
     try:
         if ignore:
             if basementStatus == (not btn.value()):
                 ignore = False
             return
-            
+
         if (basementStatus != (not btn.value())) and getBtnCooldownStatus():
             print("Button status changed")
             basementStatus = not btn.value()
-            setBtnCooldown(3)
+            setBtnCooldown(btnCooldownPeriod)
+            last_changed = getTimeRTC()
 
     except Exception as e:
         print(f'something went wrong in getButtonStatus {e}')
 
     return
-    
+
+
+# Main "Function"
 led = Pin("LED", Pin.OUT)
-led.off()
-try:    
+#led.off()
+try:
     do_connect()
     # led.on()
     #send_message(secrets['WHGroupID'], "Startup")
@@ -124,11 +133,11 @@ try:
     basementStatus = not btn.value()
 except Exception as e:
     print("Resetting on startup...")
-    led.off()
-    doWait(3) # avoid frequent resets when no internet connection
+    #led.off()
+    doWait(5) # avoid frequent resets when no internet connection
     machine.reset()
-        
-led.on()        
+
+led.on()
 while True:
     try:
         basementStatusOld = basementStatus
@@ -143,6 +152,6 @@ while True:
 
     except Exception as e:
         print("Resetting...")
-        led.off()
-        doWait(3) # avoid frequent resets when no internet connection
+        #led.off()
+        doWait(5) # avoid frequent resets when no internet connection
         machine.reset()
