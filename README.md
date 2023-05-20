@@ -22,31 +22,33 @@ The Cam Switch connector 3 is wired up to GP28 (PIN 34) of the raspbery pi pico 
 
 Bot commands are divided in two groups: Admin and General. Admin Commands are only accepted from a selected user or group (see "admins" key in secrets.py). General Commands however will be answered independent of the user. General Commands issued from groups trigger a cooldown to prevent spam (general commands during the cooldown period are ignored).
 
+Messages containing a command need to start with "@EndstationBot" and must be shorter than 120 characters.
+
 Using the keyword "silent" in the same message as a command will cause changes in the basement status not to be announced.
 
 In addition to the commands EndstationBot responds with the basement status to messages, which contain keyword combinations such as "basement" and "open".
 
 ## Admin Commands
 
-- **/forceclose**
+- **@EndstationBot forceclose**
 
-Forces the basement status to closed, independent of the status of the cam switch. The cam switch is ignored until it reflects the current basement status again (either by changing the switch status or another /force command).
+Forces the basement status to closed, independent of the status of the cam switch. The cam switch is ignored until it reflects the current basement status again (either by changing the switch status or another force command).
 
-- **/forceopen**
+- **@EndstationBot forceopen**
 
-Like /forceclose, but for changing the basement status to open.
+Like forceclose, but for changing the basement status to open.
 
-- **/help**
+- **@EndstationBot help**
 
 Returns a list of all commands including explanations.
 
 
 ## General Commands
 
-- **/basementstatus**
+- **@EndstationBot basementstatus**
 
 Returns the current basement status and the last time it was changed.
 
-- **/basementinfo**
+- **@EndstationBot basementinfo**
 
 Returns an info message about the community room.
