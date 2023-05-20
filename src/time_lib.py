@@ -42,7 +42,7 @@ def setTimeRTC():
     # NTP-Zeit holen
     tm = getTimeNTP()
     machine.RTC().datetime((tm[0], tm[1], tm[2], tm[6] + 1, tm[3], tm[4], tm[5], 0))
-    
+
 def getTimeRTC():
     #print("get RTC time")
     rtc = machine.RTC()
@@ -56,7 +56,7 @@ def getUnixTimeRTC():
 def setMsgCooldown(delay):
     global msg_cooldown_timestamp
     msg_cooldown_timestamp = getUnixTimeRTC() + (delay*60)
-    
+
 def getMsgCooldownStatus():
     try:
         if getUnixTimeRTC() > msg_cooldown_timestamp:
@@ -67,13 +67,13 @@ def getMsgCooldownStatus():
             return False
     except Exception as e:
         print(f'Something went wrong in getCooldownStatus {e}')
-       
+
     return False
 
 def setBtnCooldown(delay):
     global btn_cooldown_timestamp
     btn_cooldown_timestamp = getUnixTimeRTC() + (delay*60)
-    
+
 def getBtnCooldownStatus():
     try:
         if getUnixTimeRTC() > btn_cooldown_timestamp:
@@ -84,7 +84,7 @@ def getBtnCooldownStatus():
             return False
     except Exception as e:
         print(f'Something went wrong in getCooldownStatus {e}')
-       
+
     return False
 
 def zeroPad(num):
@@ -92,10 +92,10 @@ def zeroPad(num):
         return f'0{num}'
     else:
         return f'{num}'
-    
+
 def getDatetimeString(timeStr):
     #print(f'getTimeString {timeStr}')
-    
+
     if timeStr == (0,0,0,0,0,0,0,0):
         return ""
     return f'(last updated {timeStr[4]}:{timeStr[5]} GMT, {zeroPad(timeStr[2])}.{zeroPad(timeStr[1])})'
@@ -103,9 +103,10 @@ def getDatetimeString(timeStr):
 def getTimeString(timeStr):
     if timeStr == (0,0,0,0,0,0,0,0):
         return ""
-    current_time = getTimeRTC()
-    diff = current_time[2] - timeStr[2]
+    current_time = getUnixTimeRTC()
+    tmr = (timeStr[0], timeStr[1], timeStr[2], timeStr[4], timeStr[5], timeStr[6], timeStr[3], 0)
+    diff = int((current_time - utime.mktime(tmr))/3600)
     return f'(last updated {diff} hours ago)'
-    
+
 def doSleep(delaySeconds):
     time.sleep(delaySeconds)
