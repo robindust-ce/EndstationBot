@@ -1,13 +1,22 @@
 # EndstationBot
-This repository contains a Telegram bot that revolves around the community room of the "SV Spandauer Damm e.V.". A Raspberry Pi Pico W services requests from telegram users via the telegram API and announces the status of a cam switch in a selected group chat.
+This repository contains a Telegram bot that revolves around the community room of the "SV Spandauer Damm e.V.". A Raspberry Pi Pico W services requests from telegram users via the telegram API and announces the status of a cam switch (or "basement status") in a selected group chat.
 
 
 # Prerequisites
 
-- Raspberry Pi Pico W with a MicroPython installation
-- Cam Switch (or any other button/switch)
-- thonny IDE
+- Raspberry Pi Pico W with a [MicroPython installation](https://www.raspberrypi.com/documentation/microcontrollers/micropython.html)
+- Cam Switch (or any other switch)
+- [thonny IDE](https://thonny.org/)
 
+
+# Cam Switch
+
+The Cam Switch is used to control the basement status. Position 2 corresponds to open and positions 1 and 0 correspond to closed. Using a green LED the basement status is visually indicated at the switch.
+Whenever the position of the switch is changed and the switch position is not currently ignored (see /forceopen and /forceclose) the new basement status is broadcasted to a selected telegram group. To avoid sending multiple, unintended messages when the switch is activated multiple times in a short time frame there is a cooldown after each registered status change.
+
+The Cam Switch connector 3 is wired up to GP28 (PIN 34) of the raspbery pi pico w. Connector 4 is connected to GND (PIN 38) and GP28 is therefore set up in pull-up mode. In addition, connector 12 is connected to 3.3V (PIN 36) and connector 11 to the anode of a green LED (with an appropriate series resistance).The cathode of the LED is connected to connector 4 and therefore to GND (PIN 38).
+
+![Cam Switch](assets/camswitch.jpg?raw=true "")
 
 # Commands
 
@@ -19,25 +28,25 @@ In addition to the commands EndstationBot responds with the basement status to m
 
 ## Admin Commands
 
-- /forceclose
+- **/forceclose**
 
 Forces the basement status to closed, independent of the status of the cam switch. The cam switch is ignored until it reflects the current basement status again (either by changing the switch status or another /force command).
 
-- /forceopen
+- **/forceopen**
 
 Like /forceclose, but for changing the basement status to open.
 
-- /help
+- **/help**
 
 Returns a list of all commands including explanations.
 
 
 ## General Commands
 
-- /basementstatus
+- **/basementstatus**
 
 Returns the current basement status and the last time it was changed.
 
-- /basementinfo
+- **/basementinfo**
 
 Returns an info message about the community room.
